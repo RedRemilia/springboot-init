@@ -1,6 +1,9 @@
 ### @author <a href="https://github.com/liyupi">程序员鱼皮</a> ###
 ### @from <a href="https://yupi.icu">编程导航知识星球</a> ###
 
+### OhMyOpenCode 运行时状态（会话续跑缓存，与项目无关） ###
+.omo/
+
 HELP.md
 target/
 !.mvn/wrapper/maven-wrapper.jar
