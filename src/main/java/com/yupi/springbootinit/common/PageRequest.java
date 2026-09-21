@@ -3,6 +3,8 @@ package com.yupi.springbootinit.common;
 import com.yupi.springbootinit.constant.CommonConstant;
 import lombok.Data;
 
+import java.util.Map;
+
 /**
  * 分页请求
  *
@@ -31,4 +33,9 @@ public class PageRequest {
      * 排序顺序（默认升序）
      */
     private String sortOrder = CommonConstant.SORT_ORDER_ASC;
+
+    private Map<String, Object> filterCond;
+
+    private Map<String, Object> searchCond;
+
 }

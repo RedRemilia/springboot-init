@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- @author <a href="https://github.com/liyupi">程序员鱼皮</a> -->
+<!-- @from <a href="https://yupi.icu">编程导航知识星球</a> -->
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yupi.springbootinit.mapper.BookMapper">
+    <sql id="Base_Column_List">
+        book_id, book_name, author, total_num, left_num
+    </sql>
+
+    <resultMap id="favoriteBook" type="com.yupi.springbootinit.model.vo.FavoriteBookVO">
+        <result property="bookId" column="book_id" />
+        <result property="bookName" column="book_name" />
+        <result property="author" column="author" />
+        <result property="totalBorrowNum" column="total_borrow_num" />
+    </resultMap>
+
+    <select id="listFavoriteBook" resultMap="favoriteBook">
+        select book_id, book_name, author, total_borrow_num
+        from TRAINING.BOOKS
+        NATURAL join (
+        select book_id, count(1) as total_borrow_num
+        from TRAINING.BORROW_RECORDS
+        group by book_id ) order by total_borrow_num desc
+        limit #{topNum}
+    </select>
+</mapper>
