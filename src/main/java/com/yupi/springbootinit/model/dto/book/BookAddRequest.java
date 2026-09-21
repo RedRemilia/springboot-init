@@ -3,7 +3,7 @@ package com.yupi.springbootinit.model.dto.book;
 import lombok.Data;
 import org.hibernate.validator.constraints.Range;
 
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 import java.io.Serial;
 import java.io.Serializable;
 

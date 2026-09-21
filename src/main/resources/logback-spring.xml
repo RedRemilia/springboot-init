@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  日志配置（logback）
+  说明：
+    1. 引入 Spring Boot 官方 defaults.xml，提供 CONSOLE_LOG_PATTERN / FILE_LOG_PATTERN / %clr 颜色转换，
+       因此控制台输出格式与 Boot 默认完全一致（含 spring.application.name、PID、线程名）。
+    2. 控制台：始终输出；文件：logs/ 目录，按天 + 大小滚动；ERROR 单独落盘 error.log。
+    3. 日志目录可用环境变量 LOG_DIR 覆盖（Windows: set LOG_DIR=D:\logs 或 IDEA Run configuration 里配置）。
+    4. 注意：MyBatis 的 SQL 日志（==> Preparing / ==> Parameters）走 StdOutImpl 直接输出到控制台，
+       不受本文件控制；如需纳入 logback，把 application.yml 的 log-impl 改为 org.apache.ibatis.logging.slf4j.Slf4jImpl。
+-->
+<configuration>
+
+    <!-- Spring Boot 默认日志定义（提供 COLOR 转换器、CONSOLE_LOG_PATTERN、FILE_LOG_PATTERN、LOG_FILE 等属性） -->
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+
+    <!-- 日志文件根目录，默认相对项目运行目录下的 logs/ -->
+    <property name="LOG_DIR" value="${LOG_DIR:-logs}"/>
+
+    <!-- ==================== 控制台输出（所有环境） ==================== -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+            <!-- 不指定 charset，保持与 Boot 默认一致（继承平台默认编码，IDE 控制台正常显示中文） -->
+        </encoder>
+    </appender>
+
+    <!-- ==================== 全量日志文件（INFO 及以上，按天 + 大小滚动） ==================== -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_DIR}/app.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- 每天一个文件，同一天内超过 10MB 则按 %i 递增 -->
+            <fileNamePattern>${LOG_DIR}/app.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>10MB</maxFileSize>
+            <!-- 保留最近 30 天 -->
+            <maxHistory>30</maxHistory>
+            <!-- 所有历史文件总大小上限 1GB -->
+            <totalSizeCap>1GB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${FILE_LOG_PATTERN}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- ==================== 错误日志文件（仅 ERROR，单独留存便于排查） ==================== -->
+    <appender name="ERROR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_DIR}/error.log</file>
+        <!-- 只接收 ERROR 级别 -->
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_DIR}/error.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>10MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>500MB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${FILE_LOG_PATTERN}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- ==================== 根 Logger：INFO，输出到控制台 + 文件 + 错误文件 ==================== -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+        <appender-ref ref="ERROR_FILE"/>
+    </root>
+
+    <!-- ==================== 按环境调节业务代码日志级别 ==================== -->
+    <!-- dev / test：本地联调，业务代码输出 DEBUG 便于排查 -->
+    <springProfile name="dev">
+        <logger name="com.yupi.springbootinit" level="DEBUG"/>
+    </springProfile>
+    <springProfile name="test">
+        <logger name="com.yupi.springbootinit" level="DEBUG"/>
+    </springProfile>
+    <!-- prod：业务代码保持 INFO -->
+    <springProfile name="prod">
+        <logger name="com.yupi.springbootinit" level="INFO"/>
+    </springProfile>
+
+</configuration>

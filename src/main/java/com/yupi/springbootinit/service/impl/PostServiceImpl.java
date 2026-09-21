@@ -28,23 +28,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.sort.SortBuilder;
-import org.elasticsearch.search.sort.SortBuilders;
-import org.elasticsearch.search.sort.SortOrder;
+import co.elastic.clients.elasticsearch._types.SortOptions;
+import co.elastic.clients.elasticsearch._types.SortOrder;
+import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
+import org.springframework.data.elasticsearch.client.elc.ElasticsearchTemplate;
+import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
-import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
-import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
 
 /**
@@ -69,7 +67,7 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post> implements Po
     private PostFavourMapper postFavourMapper;
 
     @Resource
-    private ElasticsearchRestTemplate elasticsearchRestTemplate;
+    private ElasticsearchTemplate elasticsearchTemplate;
 
     @Override
     public void validPost(Post post, boolean add) {
@@ -148,62 +146,66 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post> implements Po
         long pageSize = postQueryRequest.getPageSize();
         String sortField = postQueryRequest.getSortField();
         String sortOrder = postQueryRequest.getSortOrder();
-        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+        // 构建 ES 8 Bool 查询（co.elastic.clients DSL）
+        BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder();
         // 过滤
-        boolQueryBuilder.filter(QueryBuilders.termQuery("isDelete", 0));
+        boolQueryBuilder.filter(f -> f.term(t -> t.field("isDelete").value(0)));
         if (id != null) {
-            boolQueryBuilder.filter(QueryBuilders.termQuery("id", id));
+            boolQueryBuilder.filter(f -> f.term(t -> t.field("id").value(id)));
         }
         if (notId != null) {
-            boolQueryBuilder.mustNot(QueryBuilders.termQuery("id", notId));
+            boolQueryBuilder.mustNot(f -> f.term(t -> t.field("id").value(notId)));
         }
         if (userId != null) {
-            boolQueryBuilder.filter(QueryBuilders.termQuery("userId", userId));
+            boolQueryBuilder.filter(f -> f.term(t -> t.field("userId").value(userId)));
         }
         // 必须包含所有标签
         if (CollectionUtils.isNotEmpty(tagList)) {
             for (String tag : tagList) {
-                boolQueryBuilder.filter(QueryBuilders.termQuery("tags", tag));
+                boolQueryBuilder.filter(f -> f.term(t -> t.field("tags").value(tag)));
             }
         }
         // 包含任何一个标签即可
         if (CollectionUtils.isNotEmpty(orTagList)) {
-            BoolQueryBuilder orTagBoolQueryBuilder = QueryBuilders.boolQuery();
+            BoolQuery.Builder orTagBoolQueryBuilder = new BoolQuery.Builder();
             for (String tag : orTagList) {
-                orTagBoolQueryBuilder.should(QueryBuilders.termQuery("tags", tag));
+                orTagBoolQueryBuilder.should(s -> s.term(t -> t.field("tags").value(tag)));
             }
-            orTagBoolQueryBuilder.minimumShouldMatch(1);
-            boolQueryBuilder.filter(orTagBoolQueryBuilder);
+            orTagBoolQueryBuilder.minimumShouldMatch("1");
+            boolQueryBuilder.filter(orTagBoolQueryBuilder.build()._toQuery());
         }
         // 按关键词检索
         if (StringUtils.isNotBlank(searchText)) {
-            boolQueryBuilder.should(QueryBuilders.matchQuery("title", searchText));
-            boolQueryBuilder.should(QueryBuilders.matchQuery("description", searchText));
-            boolQueryBuilder.should(QueryBuilders.matchQuery("content", searchText));
-            boolQueryBuilder.minimumShouldMatch(1);
+            boolQueryBuilder.should(s -> s.match(m -> m.field("title").query(searchText)));
+            boolQueryBuilder.should(s -> s.match(m -> m.field("description").query(searchText)));
+            boolQueryBuilder.should(s -> s.match(m -> m.field("content").query(searchText)));
+            boolQueryBuilder.minimumShouldMatch("1");
         }
         // 按标题检索
         if (StringUtils.isNotBlank(title)) {
-            boolQueryBuilder.should(QueryBuilders.matchQuery("title", title));
-            boolQueryBuilder.minimumShouldMatch(1);
+            boolQueryBuilder.should(s -> s.match(m -> m.field("title").query(title)));
+            boolQueryBuilder.minimumShouldMatch("1");
         }
         // 按内容检索
         if (StringUtils.isNotBlank(content)) {
-            boolQueryBuilder.should(QueryBuilders.matchQuery("content", content));
-            boolQueryBuilder.minimumShouldMatch(1);
+            boolQueryBuilder.should(s -> s.match(m -> m.field("content").query(content)));
+            boolQueryBuilder.minimumShouldMatch("1");
         }
+        Query query = boolQueryBuilder.build()._toQuery();
         // 排序
-        SortBuilder<?> sortBuilder = SortBuilders.scoreSort();
-        if (StringUtils.isNotBlank(sortField)) {
-            sortBuilder = SortBuilders.fieldSort(sortField);
-            sortBuilder.order(CommonConstant.SORT_ORDER_ASC.equals(sortOrder) ? SortOrder.ASC : SortOrder.DESC);
+        SortOptions sortOptions;
+        if (StringUtils.isBlank(sortField)) {
+            sortOptions = SortOptions.of(s -> s.score(ss -> ss.order(SortOrder.Desc)));
+        } else {
+            SortOrder order = CommonConstant.SORT_ORDER_ASC.equals(sortOrder) ? SortOrder.Asc : SortOrder.Desc;
+            sortOptions = SortOptions.of(s -> s.field(f -> f.field(sortField).order(order)));
         }
         // 分页
         PageRequest pageRequest = PageRequest.of((int) current, (int) pageSize);
         // 构造查询
-        NativeSearchQuery searchQuery = new NativeSearchQueryBuilder().withQuery(boolQueryBuilder)
-                .withPageable(pageRequest).withSorts(sortBuilder).build();
-        SearchHits<PostEsDTO> searchHits = elasticsearchRestTemplate.search(searchQuery, PostEsDTO.class);
+        NativeQuery searchQuery = NativeQuery.builder().withQuery(query).withPageable(pageRequest)
+                .withSort(sortOptions).build();
+        SearchHits<PostEsDTO> searchHits = elasticsearchTemplate.search(searchQuery, PostEsDTO.class);
         Page<Post> page = new Page<>();
         page.setTotal(searchHits.getTotalHits());
         List<Post> resourceList = new ArrayList<>();
@@ -220,7 +222,7 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post> implements Po
                         resourceList.add(idPostMap.get(postId).get(0));
                     } else {
                         // 从 es 清空 db 已物理删除的数据
-                        String delete = elasticsearchRestTemplate.delete(String.valueOf(postId), PostEsDTO.class);
+                        String delete = elasticsearchTemplate.delete(String.valueOf(postId), PostEsDTO.class);
                         log.info("delete post {}", delete);
                     }
                 });

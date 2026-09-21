@@ -10,20 +10,16 @@ import com.yupi.springbootinit.config.WxOpenConfig;
 import com.yupi.springbootinit.constant.UserConstant;
 import com.yupi.springbootinit.exception.BusinessException;
 import com.yupi.springbootinit.exception.ThrowUtils;
-import com.yupi.springbootinit.model.dto.user.UserAddRequest;
-import com.yupi.springbootinit.model.dto.user.UserLoginRequest;
-import com.yupi.springbootinit.model.dto.user.UserQueryRequest;
-import com.yupi.springbootinit.model.dto.user.UserRegisterRequest;
-import com.yupi.springbootinit.model.dto.user.UserUpdateMyRequest;
-import com.yupi.springbootinit.model.dto.user.UserUpdateRequest;
+import com.yupi.springbootinit.model.dto.user.*;
 import com.yupi.springbootinit.model.entity.User;
 import com.yupi.springbootinit.model.vo.LoginUserVO;
 import com.yupi.springbootinit.model.vo.UserVO;
+import com.yupi.springbootinit.service.UserNewService;
 import com.yupi.springbootinit.service.UserService;
 import java.util.List;
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.bean.WxOAuth2UserInfo;
 import me.chanjar.weixin.common.bean.oauth2.WxOAuth2AccessToken;
@@ -52,6 +48,9 @@ public class UserController {
     private UserService userService;
 
     @Resource
+    private UserNewService userNewService;
+
+    @Resource
     private WxOpenConfig wxOpenConfig;
 
     // region 登录相关
@@ -75,6 +74,27 @@ public class UserController {
         }
         long result = userService.userRegister(userAccount, userPassword, checkPassword);
         return ResultUtils.success(result);
+    }
+
+
+    @PostMapping("/registerNew")
+    public BaseResponse<Long> userRegisterNew(@RequestBody UserRegisterNewRequest userRegisterNewRequest) {
+        if (userRegisterNewRequest == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+
+        long result = userNewService.registerNew(userRegisterNewRequest.getUserNew());
+
+        return ResultUtils.success(result);
+    }
+
+    /**
+     * 发送验证码
+     *
+     */
+    @PostMapping
+    public void sendVerifyCode() {
+
     }
 
     /**
