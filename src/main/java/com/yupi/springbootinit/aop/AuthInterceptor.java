@@ -1,8 +1,8 @@
 package com.yupi.springbootinit.aop;
 
 import com.yupi.springbootinit.annotation.AuthCheck;
-import com.yupi.springbootinit.common.ErrorCode;
-import com.yupi.springbootinit.exception.BusinessException;
+import com.yupi.springbootinit.common.OldErrorCode;
+import com.yupi.springbootinit.exception.BaseException;
 import com.yupi.springbootinit.model.entity.User;
 import com.yupi.springbootinit.model.enums.UserRoleEnum;
 import com.yupi.springbootinit.service.UserService;
@@ -48,17 +48,17 @@ public class AuthInterceptor {
         if (StringUtils.isNotBlank(mustRole)) {
             UserRoleEnum mustUserRoleEnum = UserRoleEnum.getEnumByValue(mustRole);
             if (mustUserRoleEnum == null) {
-                throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+                throw new BaseException(OldErrorCode.NO_AUTH_ERROR);
             }
             String userRole = loginUser.getUserRole();
             // 如果被封号，直接拒绝
             if (UserRoleEnum.BAN.equals(mustUserRoleEnum)) {
-                throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+                throw new BaseException(OldErrorCode.NO_AUTH_ERROR);
             }
             // 必须有管理员权限
             if (UserRoleEnum.ADMIN.equals(mustUserRoleEnum)) {
                 if (!mustRole.equals(userRole)) {
-                    throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+                    throw new BaseException(OldErrorCode.NO_AUTH_ERROR);
                 }
             }
         }

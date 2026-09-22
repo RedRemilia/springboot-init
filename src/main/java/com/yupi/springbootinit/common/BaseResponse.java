@@ -1,6 +1,8 @@
 package com.yupi.springbootinit.common;
 
 import java.io.Serializable;
+
+import com.yupi.springbootinit.common.errorcode.ErrorCode;
 import lombok.Data;
 
 /**
@@ -27,6 +29,10 @@ public class BaseResponse<T> implements Serializable {
 
     public BaseResponse(int code, T data) {
         this(code, data, "");
+    }
+
+    public BaseResponse(OldErrorCode oldErrorCode) {
+        this(oldErrorCode.getCode(), null, oldErrorCode.getMessage());
     }
 
     public BaseResponse(ErrorCode errorCode) {

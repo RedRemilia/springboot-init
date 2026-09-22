@@ -1,15 +1,12 @@
 package com.yupi.springbootinit.exception;
 
 import com.yupi.springbootinit.common.BaseResponse;
-import com.yupi.springbootinit.common.ErrorCode;
+import com.yupi.springbootinit.common.OldErrorCode;
 import com.yupi.springbootinit.common.ResultUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * 全局异常处理器
@@ -30,11 +27,11 @@ public class GlobalExceptionHandler {
                     .append(fieldError.getDefaultMessage())
                     .append("; ");
         });
-        return ResultUtils.error(ErrorCode.PARAMS_ERROR, message.toString());
+        return ResultUtils.error(OldErrorCode.PARAMS_ERROR, message.toString());
     }
 
-    @ExceptionHandler(BusinessException.class)
-    public BaseResponse<?> businessExceptionHandler(BusinessException e) {
+    @ExceptionHandler(BaseException.class)
+    public BaseResponse<?> businessExceptionHandler(BaseException e) {
         log.error("BusinessException", e);
         return ResultUtils.error(e.getCode(), e.getMessage());
     }
@@ -42,6 +39,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(RuntimeException.class)
     public BaseResponse<?> runtimeExceptionHandler(RuntimeException e) {
         log.error("RuntimeException", e);
-        return ResultUtils.error(ErrorCode.SYSTEM_ERROR, "系统错误");
+        return ResultUtils.error(OldErrorCode.SYSTEM_ERROR, "系统错误");
     }
 }

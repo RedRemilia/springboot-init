@@ -1,12 +1,15 @@
 package com.yupi.springbootinit.common;
 
+import lombok.Getter;
+
 /**
  * 自定义错误码
  *
  * @author <a href="https://github.com/liyupi">程序员鱼皮</a>
  * @from <a href="https://yupi.icu">编程导航知识星球</a>
  */
-public enum ErrorCode {
+@Getter
+public enum OldErrorCode {
 
     SUCCESS(0, "ok"),
     PARAMS_ERROR(40000, "请求参数错误"),
@@ -27,17 +30,9 @@ public enum ErrorCode {
      */
     private final String message;
 
-    ErrorCode(int code, String message) {
+    OldErrorCode(int code, String message) {
         this.code = code;
         this.message = message;
-    }
-
-    public int getCode() {
-        return code;
-    }
-
-    public String getMessage() {
-        return message;
     }
 
 }

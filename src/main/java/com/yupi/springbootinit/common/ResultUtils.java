@@ -22,11 +22,11 @@ public class ResultUtils {
     /**
      * 失败
      *
-     * @param errorCode
+     * @param oldErrorCode
      * @return
      */
-    public static BaseResponse error(ErrorCode errorCode) {
-        return new BaseResponse<>(errorCode);
+    public static BaseResponse error(OldErrorCode oldErrorCode) {
+        return new BaseResponse<>(oldErrorCode);
     }
 
     /**
@@ -43,10 +43,10 @@ public class ResultUtils {
     /**
      * 失败
      *
-     * @param errorCode
+     * @param oldErrorCode
      * @return
      */
-    public static BaseResponse error(ErrorCode errorCode, String message) {
-        return new BaseResponse(errorCode.getCode(), null, message);
+    public static BaseResponse error(OldErrorCode oldErrorCode, String message) {
+        return new BaseResponse(oldErrorCode.getCode(), null, message);
     }
 }

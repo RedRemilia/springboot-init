@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.yupi.springbootinit.common.ErrorCode;
+import com.yupi.springbootinit.common.OldErrorCode;
 import com.yupi.springbootinit.constant.CommonConstant;
 import com.yupi.springbootinit.exception.BookException;
 import com.yupi.springbootinit.mapper.BookMapper;
@@ -109,9 +109,9 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
 
         Book book = bookMapper.selectById(borrowRequest.getBookId());
         if (book == null) {
-            throw new BookException(ErrorCode.NOT_FOUND_ERROR, "书籍不存在");
+            throw new BookException(OldErrorCode.NOT_FOUND_ERROR, "书籍不存在");
         } else if (book.getLeftNum() <= 0) {
-            throw  new BookException(ErrorCode.OPERATION_ERROR, "库存不足");
+            throw  new BookException(OldErrorCode.OPERATION_ERROR, "库存不足");
         }
 
         book.setLeftNum(book.getLeftNum() - 1);

@@ -2,9 +2,9 @@ package com.yupi.springbootinit.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.yupi.springbootinit.common.BaseResponse;
-import com.yupi.springbootinit.common.ErrorCode;
+import com.yupi.springbootinit.common.OldErrorCode;
 import com.yupi.springbootinit.common.ResultUtils;
-import com.yupi.springbootinit.exception.BusinessException;
+import com.yupi.springbootinit.exception.BaseException;
 import com.yupi.springbootinit.exception.ThrowUtils;
 import com.yupi.springbootinit.model.dto.post.PostQueryRequest;
 import com.yupi.springbootinit.model.dto.postfavour.PostFavourAddRequest;
@@ -54,7 +54,7 @@ public class PostFavourController {
     public BaseResponse<Integer> doPostFavour(@RequestBody PostFavourAddRequest postFavourAddRequest,
             HttpServletRequest request) {
         if (postFavourAddRequest == null || postFavourAddRequest.getPostId() <= 0) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+            throw new BaseException(OldErrorCode.PARAMS_ERROR);
         }
         // 登录才能操作
         final User loginUser = userService.getLoginUser(request);
@@ -73,13 +73,13 @@ public class PostFavourController {
     public BaseResponse<Page<PostVO>> listMyFavourPostByPage(@RequestBody PostQueryRequest postQueryRequest,
             HttpServletRequest request) {
         if (postQueryRequest == null) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+            throw new BaseException(OldErrorCode.PARAMS_ERROR);
         }
         User loginUser = userService.getLoginUser(request);
         long current = postQueryRequest.getCurrent();
         long size = postQueryRequest.getPageSize();
         // 限制爬虫
-        ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
+        ThrowUtils.throwIf(size > 20, OldErrorCode.PARAMS_ERROR);
         Page<Post> postPage = postFavourService.listFavourPostByPage(new Page<>(current, size),
                 postService.getQueryWrapper(postQueryRequest), loginUser.getId());
         return ResultUtils.success(postService.getPostVOPage(postPage, request));
@@ -95,13 +95,13 @@ public class PostFavourController {
     public BaseResponse<Page<PostVO>> listFavourPostByPage(@RequestBody PostFavourQueryRequest postFavourQueryRequest,
             HttpServletRequest request) {
         if (postFavourQueryRequest == null) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+            throw new BaseException(OldErrorCode.PARAMS_ERROR);
         }
         long current = postFavourQueryRequest.getCurrent();
         long size = postFavourQueryRequest.getPageSize();
         Long userId = postFavourQueryRequest.getUserId();
         // 限制爬虫
-        ThrowUtils.throwIf(size > 20 || userId == null, ErrorCode.PARAMS_ERROR);
+        ThrowUtils.throwIf(size > 20 || userId == null, OldErrorCode.PARAMS_ERROR);
         Page<Post> postPage = postFavourService.listFavourPostByPage(new Page<>(current, size),
                 postService.getQueryWrapper(postFavourQueryRequest.getPostQueryRequest()), userId);
         return ResultUtils.success(postService.getPostVOPage(postPage, request));

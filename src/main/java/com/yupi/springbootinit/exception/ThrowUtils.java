@@ -1,6 +1,6 @@
 package com.yupi.springbootinit.exception;
 
-import com.yupi.springbootinit.common.ErrorCode;
+import com.yupi.springbootinit.common.OldErrorCode;
 
 /**
  * 抛异常工具类
@@ -26,20 +26,20 @@ public class ThrowUtils {
      * 条件成立则抛异常
      *
      * @param condition
-     * @param errorCode
+     * @param oldErrorCode
      */
-    public static void throwIf(boolean condition, ErrorCode errorCode) {
-        throwIf(condition, new BusinessException(errorCode));
+    public static void throwIf(boolean condition, OldErrorCode oldErrorCode) {
+        throwIf(condition, new BaseException(oldErrorCode));
     }
 
     /**
      * 条件成立则抛异常
      *
      * @param condition
-     * @param errorCode
+     * @param oldErrorCode
      * @param message
      */
-    public static void throwIf(boolean condition, ErrorCode errorCode, String message) {
-        throwIf(condition, new BusinessException(errorCode, message));
+    public static void throwIf(boolean condition, OldErrorCode oldErrorCode, String message) {
+        throwIf(condition, new BaseException(oldErrorCode, message));
     }
 }

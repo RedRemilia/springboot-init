@@ -2,8 +2,8 @@ package com.yupi.springbootinit.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.yupi.springbootinit.common.ErrorCode;
-import com.yupi.springbootinit.exception.BusinessException;
+import com.yupi.springbootinit.common.OldErrorCode;
+import com.yupi.springbootinit.exception.BaseException;
 import com.yupi.springbootinit.mapper.PostThumbMapper;
 import com.yupi.springbootinit.model.entity.Post;
 import com.yupi.springbootinit.model.entity.PostThumb;
@@ -40,7 +40,7 @@ public class PostThumbServiceImpl extends ServiceImpl<PostThumbMapper, PostThumb
         // 判断实体是否存在，根据类别获取实体
         Post post = postService.getById(postId);
         if (post == null) {
-            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+            throw new BaseException(OldErrorCode.NOT_FOUND_ERROR);
         }
         // 是否已点赞
         long userId = loginUser.getId();
@@ -80,7 +80,7 @@ public class PostThumbServiceImpl extends ServiceImpl<PostThumbMapper, PostThumb
                         .update();
                 return result ? -1 : 0;
             } else {
-                throw new BusinessException(ErrorCode.SYSTEM_ERROR);
+                throw new BaseException(OldErrorCode.SYSTEM_ERROR);
             }
         } else {
             // 未点赞
@@ -93,7 +93,7 @@ public class PostThumbServiceImpl extends ServiceImpl<PostThumbMapper, PostThumb
                         .update();
                 return result ? 1 : 0;
             } else {
-                throw new BusinessException(ErrorCode.SYSTEM_ERROR);
+                throw new BaseException(OldErrorCode.SYSTEM_ERROR);
             }
         }
     }

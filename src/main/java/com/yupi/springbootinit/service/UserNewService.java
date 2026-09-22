@@ -7,4 +7,8 @@ public interface UserNewService extends IService<UserNew> {
 
     long registerNew(UserNew userNew);
 
+    String sendVerifyCode(String phone);
+
+    void validateVerifyCode(String verifyId, String verifyCode);
+
 }

@@ -1,9 +1,9 @@
 package com.yupi.springbootinit.controller;
 
 import com.yupi.springbootinit.common.BaseResponse;
-import com.yupi.springbootinit.common.ErrorCode;
+import com.yupi.springbootinit.common.OldErrorCode;
 import com.yupi.springbootinit.common.ResultUtils;
-import com.yupi.springbootinit.exception.BusinessException;
+import com.yupi.springbootinit.exception.BaseException;
 import com.yupi.springbootinit.model.dto.postthumb.PostThumbAddRequest;
 import com.yupi.springbootinit.model.entity.User;
 import com.yupi.springbootinit.service.PostThumbService;
@@ -44,7 +44,7 @@ public class PostThumbController {
     public BaseResponse<Integer> doThumb(@RequestBody PostThumbAddRequest postThumbAddRequest,
             HttpServletRequest request) {
         if (postThumbAddRequest == null || postThumbAddRequest.getPostId() <= 0) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+            throw new BaseException(OldErrorCode.PARAMS_ERROR);
         }
         // 登录才能点赞
         final User loginUser = userService.getLoginUser(request);

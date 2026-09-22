@@ -4,9 +4,9 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.gson.Gson;
-import com.yupi.springbootinit.common.ErrorCode;
+import com.yupi.springbootinit.common.OldErrorCode;
 import com.yupi.springbootinit.constant.CommonConstant;
-import com.yupi.springbootinit.exception.BusinessException;
+import com.yupi.springbootinit.exception.BaseException;
 import com.yupi.springbootinit.exception.ThrowUtils;
 import com.yupi.springbootinit.mapper.PostFavourMapper;
 import com.yupi.springbootinit.mapper.PostMapper;
@@ -72,21 +72,21 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post> implements Po
     @Override
     public void validPost(Post post, boolean add) {
         if (post == null) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+            throw new BaseException(OldErrorCode.PARAMS_ERROR);
         }
         String title = post.getTitle();
         String content = post.getContent();
         String tags = post.getTags();
         // 创建时，参数不能为空
         if (add) {
-            ThrowUtils.throwIf(StringUtils.isAnyBlank(title, content, tags), ErrorCode.PARAMS_ERROR);
+            ThrowUtils.throwIf(StringUtils.isAnyBlank(title, content, tags), OldErrorCode.PARAMS_ERROR);
         }
         // 有参数则校验
         if (StringUtils.isNotBlank(title) && title.length() > 80) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "标题过长");
+            throw new BaseException(OldErrorCode.PARAMS_ERROR, "标题过长");
         }
         if (StringUtils.isNotBlank(content) && content.length() > 8192) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "内容过长");
+            throw new BaseException(OldErrorCode.PARAMS_ERROR, "内容过长");
         }
     }
 

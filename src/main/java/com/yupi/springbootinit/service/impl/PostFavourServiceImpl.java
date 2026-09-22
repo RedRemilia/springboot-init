@@ -5,8 +5,8 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.yupi.springbootinit.common.ErrorCode;
-import com.yupi.springbootinit.exception.BusinessException;
+import com.yupi.springbootinit.common.OldErrorCode;
+import com.yupi.springbootinit.exception.BaseException;
 import com.yupi.springbootinit.mapper.PostFavourMapper;
 import com.yupi.springbootinit.model.entity.Post;
 import com.yupi.springbootinit.model.entity.PostFavour;
@@ -43,7 +43,7 @@ public class PostFavourServiceImpl extends ServiceImpl<PostFavourMapper, PostFav
         // 判断是否存在
         Post post = postService.getById(postId);
         if (post == null) {
-            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+            throw new BaseException(OldErrorCode.NOT_FOUND_ERROR);
         }
         // 是否已帖子收藏
         long userId = loginUser.getId();
@@ -91,7 +91,7 @@ public class PostFavourServiceImpl extends ServiceImpl<PostFavourMapper, PostFav
                         .update();
                 return result ? -1 : 0;
             } else {
-                throw new BusinessException(ErrorCode.SYSTEM_ERROR);
+                throw new BaseException(OldErrorCode.SYSTEM_ERROR);
             }
         } else {
             // 未帖子收藏
@@ -104,7 +104,7 @@ public class PostFavourServiceImpl extends ServiceImpl<PostFavourMapper, PostFav
                         .update();
                 return result ? 1 : 0;
             } else {
-                throw new BusinessException(ErrorCode.SYSTEM_ERROR);
+                throw new BaseException(OldErrorCode.SYSTEM_ERROR);
             }
         }
     }

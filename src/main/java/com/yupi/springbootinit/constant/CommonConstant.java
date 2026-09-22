@@ -17,5 +17,7 @@ public interface CommonConstant {
      * 降序
      */
     String SORT_ORDER_DESC = "descend";
+
+    String AUTH_HMAC_KEY = "asdf20260101";
     
 }
