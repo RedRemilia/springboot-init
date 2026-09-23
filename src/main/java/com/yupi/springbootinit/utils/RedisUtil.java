@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 @Component
 @RequiredArgsConstructor
-public class RedisUtils {
+public class RedisUtil {
 
     private final StringRedisTemplate stringRedisTemplate;
 
@@ -50,8 +50,8 @@ public class RedisUtils {
         stringRedisTemplate.expire(key, seconds, TimeUnit.SECONDS);
     }
 
-    public void del(String key) {
-        stringRedisTemplate.delete(key);
+    public Boolean del(String key) {
+        return stringRedisTemplate.delete(key);
     }
 
     public void hset(String key, String field, Object value) {

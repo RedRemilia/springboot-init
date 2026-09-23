@@ -1,5 +1,6 @@
 package com.yupi.springbootinit.model.vo;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 import lombok.Data;
@@ -12,6 +13,9 @@ import lombok.Data;
  **/
 @Data
 public class LoginUserVO implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     /**
      * 用户 id
@@ -48,5 +52,5 @@ public class LoginUserVO implements Serializable {
      */
     private Date updateTime;
 
-    private static final long serialVersionUID = 1L;
+
 }

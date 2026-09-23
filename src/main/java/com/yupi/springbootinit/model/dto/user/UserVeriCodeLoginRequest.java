@@ -4,7 +4,10 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
-public class UserValidateVerifyCodeRequest {
+public class UserVeriCodeLoginRequest {
+
+    @NotNull
+    private String phone;
 
     @NotNull
     private final String verifyId;

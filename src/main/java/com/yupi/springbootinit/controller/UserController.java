@@ -9,18 +9,20 @@ import com.yupi.springbootinit.common.ResultUtils;
 import com.yupi.springbootinit.common.errorcode.HttpErrorCode;
 import com.yupi.springbootinit.config.WxOpenConfig;
 import com.yupi.springbootinit.constant.UserConstant;
+import com.yupi.springbootinit.exception.AuthException;
 import com.yupi.springbootinit.exception.BaseException;
 import com.yupi.springbootinit.exception.ThrowUtils;
 import com.yupi.springbootinit.model.dto.user.*;
 import com.yupi.springbootinit.model.entity.User;
 import com.yupi.springbootinit.model.vo.LoginUserVO;
+import com.yupi.springbootinit.model.vo.LoginVO;
 import com.yupi.springbootinit.model.vo.UserVO;
+import com.yupi.springbootinit.model.vo.ValidateVO;
 import com.yupi.springbootinit.service.UserNewService;
 import com.yupi.springbootinit.service.UserService;
 import java.util.List;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.bean.WxOAuth2UserInfo;
@@ -37,9 +39,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 用户接口
- *
- * @author <a href="https://github.com/liyupi">程序员鱼皮</a>
- * @from <a href="https://yupi.icu">编程导航知识星球</a>
  */
 @RestController
 @RequestMapping("/user")
@@ -59,9 +58,6 @@ public class UserController {
 
     /**
      * 用户注册
-     *
-     * @param userRegisterRequest
-     * @return
      */
     @PostMapping("/register")
     public BaseResponse<Long> userRegister(@RequestBody UserRegisterRequest userRegisterRequest) {
@@ -93,7 +89,7 @@ public class UserController {
     /**
      * 发送验证码
      */
-    @PostMapping("/sendVerifyCode")
+    @PostMapping("/login/send_code")
     public BaseResponse<String> sendVerifyCode(@RequestBody @Valid UserSendVerifyCodeRequest userSendVerifyCodeRequest) {
 
         if (userSendVerifyCodeRequest == null) {
@@ -104,27 +100,40 @@ public class UserController {
     }
 
     /**
-     * 验证验证码
+     * 验证码登录/注册
      */
-    @PostMapping("/validateVerifyCode")
-    public BaseResponse<String> validateVerifyCode(@RequestBody @Valid UserValidateVerifyCodeRequest userValidateVerifyCodeRequest) {
-        if (userValidateVerifyCodeRequest == null) {
+    @PostMapping("/login/veri_code")
+    public BaseResponse<LoginVO> veriCodeLogin(@RequestBody @Valid UserVeriCodeLoginRequest userVeriCodeLoginRequest) {
+        if (userVeriCodeLoginRequest == null) {
             throw new BaseException(HttpErrorCode.PARAMS_ERROR);
         }
-        String verifyId = userValidateVerifyCodeRequest.getVerifyId();
-        String verifyCode = userValidateVerifyCodeRequest.getVerifyCode();
-        userNewService.validateVerifyCode(verifyId, verifyCode);
-        return ResultUtils.success("login success");
+        String phone = userVeriCodeLoginRequest.getPhone();
+        String verifyId = userVeriCodeLoginRequest.getVerifyId();
+        String verifyCode = userVeriCodeLoginRequest.getVerifyCode();
+        LoginVO loginVO = new LoginVO();
+        ValidateVO validate = new ValidateVO();
+        loginVO.setValidate(validate);
+        try {
+            // 校验验证码
+            userNewService.validateVerifyCode(phone, verifyId, verifyCode);
+            validate.setStatus(true);
+            validate.setMessage("success");
+            // 获取用户信息
+             loginVO.setLoginUserNew(userNewService.loginByPhone(phone));
+            return ResultUtils.success(loginVO);
+        } catch (AuthException e) {
+            // 验证失败返回false
+            validate.setStatus(false);
+            validate.setMessage(e.getMessage());
+            return ResultUtils.success(loginVO);
+        }
+
     }
 
     /**
      * 用户登录
-     *
-     * @param userLoginRequest
-     * @param request
-     * @return
      */
-    @PostMapping("/login")
+    @PostMapping("/login/pwd")
     public BaseResponse<LoginUserVO> userLogin(@RequestBody UserLoginRequest userLoginRequest, HttpServletRequest request) {
         if (userLoginRequest == null) {
             throw new BaseException(OldErrorCode.PARAMS_ERROR);
@@ -142,8 +151,8 @@ public class UserController {
      * 用户登录（微信开放平台）
      */
     @GetMapping("/login/wx_open")
-    public BaseResponse<LoginUserVO> userLoginByWxOpen(HttpServletRequest request, HttpServletResponse response,
-            @RequestParam("code") String code) {
+    public BaseResponse<LoginUserVO> userLoginByWxOpen(HttpServletRequest request,
+                                                       @RequestParam("code") String code) {
         WxOAuth2AccessToken accessToken;
         try {
             WxMpService wxService = wxOpenConfig.getWxMpService();
@@ -163,9 +172,6 @@ public class UserController {
 
     /**
      * 用户注销
-     *
-     * @param request
-     * @return
      */
     @PostMapping("/logout")
     public BaseResponse<Boolean> userLogout(HttpServletRequest request) {
@@ -178,9 +184,6 @@ public class UserController {
 
     /**
      * 获取当前登录用户
-     *
-     * @param request
-     * @return
      */
     @GetMapping("/get/login")
     public BaseResponse<LoginUserVO> getLoginUser(HttpServletRequest request) {
@@ -194,14 +197,10 @@ public class UserController {
 
     /**
      * 创建用户
-     *
-     * @param userAddRequest
-     * @param request
-     * @return
      */
     @PostMapping("/add")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
-    public BaseResponse<Long> addUser(@RequestBody UserAddRequest userAddRequest, HttpServletRequest request) {
+    public BaseResponse<Long> addUser(@RequestBody UserAddRequest userAddRequest) {
         if (userAddRequest == null) {
             throw new BaseException(OldErrorCode.PARAMS_ERROR);
         }
@@ -214,14 +213,10 @@ public class UserController {
 
     /**
      * 删除用户
-     *
-     * @param deleteRequest
-     * @param request
-     * @return
      */
     @PostMapping("/delete")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
-    public BaseResponse<Boolean> deleteUser(@RequestBody DeleteRequest deleteRequest, HttpServletRequest request) {
+    public BaseResponse<Boolean> deleteUser(@RequestBody DeleteRequest deleteRequest) {
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
             throw new BaseException(OldErrorCode.PARAMS_ERROR);
         }
@@ -231,15 +226,10 @@ public class UserController {
 
     /**
      * 更新用户
-     *
-     * @param userUpdateRequest
-     * @param request
-     * @return
      */
     @PostMapping("/update")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
-    public BaseResponse<Boolean> updateUser(@RequestBody UserUpdateRequest userUpdateRequest,
-            HttpServletRequest request) {
+    public BaseResponse<Boolean> updateUser(@RequestBody UserUpdateRequest userUpdateRequest) {
         if (userUpdateRequest == null || userUpdateRequest.getId() == null) {
             throw new BaseException(OldErrorCode.PARAMS_ERROR);
         }
@@ -252,14 +242,10 @@ public class UserController {
 
     /**
      * 根据 id 获取用户（仅管理员）
-     *
-     * @param id
-     * @param request
-     * @return
      */
     @GetMapping("/get")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
-    public BaseResponse<User> getUserById(long id, HttpServletRequest request) {
+    public BaseResponse<User> getUserById(long id) {
         if (id <= 0) {
             throw new BaseException(OldErrorCode.PARAMS_ERROR);
         }
@@ -270,29 +256,20 @@ public class UserController {
 
     /**
      * 根据 id 获取包装类
-     *
-     * @param id
-     * @param request
-     * @return
      */
     @GetMapping("/get/vo")
-    public BaseResponse<UserVO> getUserVOById(long id, HttpServletRequest request) {
-        BaseResponse<User> response = getUserById(id, request);
+    public BaseResponse<UserVO> getUserVOById(long id) {
+        BaseResponse<User> response = getUserById(id);
         User user = response.getData();
         return ResultUtils.success(userService.getUserVO(user));
     }
 
     /**
      * 分页获取用户列表（仅管理员）
-     *
-     * @param userQueryRequest
-     * @param request
-     * @return
      */
     @PostMapping("/list/page")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
-    public BaseResponse<Page<User>> listUserByPage(@RequestBody UserQueryRequest userQueryRequest,
-            HttpServletRequest request) {
+    public BaseResponse<Page<User>> listUserByPage(@RequestBody UserQueryRequest userQueryRequest) {
         long current = userQueryRequest.getCurrent();
         long size = userQueryRequest.getPageSize();
         Page<User> userPage = userService.page(new Page<>(current, size),
@@ -302,14 +279,9 @@ public class UserController {
 
     /**
      * 分页获取用户封装列表
-     *
-     * @param userQueryRequest
-     * @param request
-     * @return
      */
     @PostMapping("/list/page/vo")
-    public BaseResponse<Page<UserVO>> listUserVOByPage(@RequestBody UserQueryRequest userQueryRequest,
-            HttpServletRequest request) {
+    public BaseResponse<Page<UserVO>> listUserVOByPage(@RequestBody UserQueryRequest userQueryRequest) {
         if (userQueryRequest == null) {
             throw new BaseException(OldErrorCode.PARAMS_ERROR);
         }
@@ -329,10 +301,6 @@ public class UserController {
 
     /**
      * 更新个人信息
-     *
-     * @param userUpdateMyRequest
-     * @param request
-     * @return
      */
     @PostMapping("/update/my")
     public BaseResponse<Boolean> updateMyUser(@RequestBody UserUpdateMyRequest userUpdateMyRequest,

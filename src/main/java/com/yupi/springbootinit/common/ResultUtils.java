@@ -1,5 +1,7 @@
 package com.yupi.springbootinit.common;
 
+import com.yupi.springbootinit.common.errorcode.ErrorCode;
+
 /**
  * 返回工具类
  *
@@ -10,10 +12,6 @@ public class ResultUtils {
 
     /**
      * 成功
-     *
-     * @param data
-     * @param <T>
-     * @return
      */
     public static <T> BaseResponse<T> success(T data) {
         return new BaseResponse<>(0, data, "ok");
@@ -21,20 +19,17 @@ public class ResultUtils {
 
     /**
      * 失败
-     *
-     * @param oldErrorCode
-     * @return
      */
     public static BaseResponse error(OldErrorCode oldErrorCode) {
         return new BaseResponse<>(oldErrorCode);
     }
 
+    public static BaseResponse error(ErrorCode errorCode) {
+        return new BaseResponse<>(errorCode);
+    }
+
     /**
      * 失败
-     *
-     * @param code
-     * @param message
-     * @return
      */
     public static BaseResponse error(int code, String message) {
         return new BaseResponse(code, null, message);
@@ -42,9 +37,6 @@ public class ResultUtils {
 
     /**
      * 失败
-     *
-     * @param oldErrorCode
-     * @return
      */
     public static BaseResponse error(OldErrorCode oldErrorCode, String message) {
         return new BaseResponse(oldErrorCode.getCode(), null, message);

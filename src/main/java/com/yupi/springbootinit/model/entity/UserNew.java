@@ -9,6 +9,7 @@ import lombok.Data;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 @Data
 @TableName(value = "userNew", autoResultMap = true)
@@ -24,11 +25,15 @@ public class UserNew implements Serializable {
 
     String password;
 
-    @TableField(typeHandler = JacksonTypeHandler.class)
-    Address homeAddr;
+    String phone;
 
-    @TableField(typeHandler = JacksonTypeHandler.class)
-    Address workAddr;
+    LocalDateTime createTime;
+
+    LocalDateTime updateTime;
+
+    LocalDateTime lastLoginTime;
+
+    String lastLoginIp;
 
     Boolean isDeleted;
 

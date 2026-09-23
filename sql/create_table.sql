@@ -26,32 +26,21 @@ create table if not exists user
     index idx_unionId (unionId)
 ) comment '用户' collate = utf8mb4_unicode_ci;
 
+
+drop table if exists userNew;
 create table if not exists userNew
 (
     userId int auto_increment comment 'id' primary key ,
     userName varchar(255) not null comment '用户名',
-    password varchar(255) not null comment '密码',
-    homeAddr varchar(1024) comment '家庭地址',
-    workAddr varchar(1024) comment '工作地址',
-#     homeProvince varchar(255),
-#     homeCity varchar(255),
-#     homeStreet varchar(255),
-#     workProvince varchar(255),
-#     workCity varchar(255),
-#     workStreet varchar(255),
-    isDeleted bool not null default false comment '是否删除'
+    password varchar(255) comment '密码',
+    phone varchar(20) not null unique comment '手机号',
+    isDeleted bool not null default false comment '是否删除',
+    createTime DATETIME comment '创建时间',
+    updateTime DATETIME comment '上次修改时间',
+    lastLoginTime DATETIME comment '上次登录时间',
+    lastLoginIP varchar(16) comment '上次登录IP'
 ) comment '用户测试' collate = utf8mb4_unicode_ci;
 
-# update userNew set isDeleted = false;
-# alter table userNew modify column isDeleted bool not null default false comment '是否删除';
-# alter table userNew add column homeAddr varchar(1024) comment '家庭地址';
-# alter table userNew add column workAddr varchar(1024) comment '工作地址';
-# alter table userNew drop column homeProvince;
-# alter table userNew drop column homeCity;
-# alter table userNew drop column homeStreet;
-# alter table userNew drop column workProvince;
-# alter table userNew drop column workCity;
-# alter table userNew drop column workStreet;
 
 -- 帖子表
 create table if not exists post
