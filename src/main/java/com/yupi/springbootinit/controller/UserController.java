@@ -1,5 +1,6 @@
 package com.yupi.springbootinit.controller;
 
+import com.yupi.springbootinit.annotation.Auth;
 import com.yupi.springbootinit.common.BaseResponse;
 import com.yupi.springbootinit.common.ResultUtils;
 import com.yupi.springbootinit.common.errorcode.HttpErrorCode;
@@ -30,13 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
     @Resource
-    private UserService userService;
-
-    @Resource
     private UserNewService userNewService;
-
-    @Resource
-    private WxOpenConfig wxOpenConfig;
 
     // region 登录相关
 
@@ -120,6 +115,18 @@ public class UserController {
             validate.setStatus(false);
         }
         return ResultUtils.success(loginVO);
+    }
+
+    @PostMapping("/update")
+    @Auth
+    public BaseResponse<Boolean> updateUser(@RequestBody UserPwdLoginRequest userPwdLoginRequest) {
+        if (userPwdLoginRequest == null) {
+            throw new BaseException(HttpErrorCode.PARAMS_ERROR);
+        }
+
+
+
+        return ResultUtils.success(true);
     }
 
 //    /**

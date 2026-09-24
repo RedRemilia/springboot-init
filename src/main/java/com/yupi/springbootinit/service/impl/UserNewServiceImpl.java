@@ -2,8 +2,6 @@ package com.yupi.springbootinit.service.impl;
 
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.jwt.JWT;
-import cn.hutool.jwt.JWTPayload;
-import cn.hutool.jwt.JWTUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -25,10 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -83,8 +78,8 @@ public class UserNewServiceImpl extends ServiceImpl<UserNewMapper, UserNew>
 
         Integer MAX_ATTEMPTS = 5;
         Long result = stringRedisTemplate.execute(
-                verifyCodeScript, 
-                Arrays.asList(verifyInfoKey, inputVerifyCode), 
+                verifyCodeScript,
+                List.of(verifyInfoKey),
                 phone,
                 inputVerifyCode,
                 String.valueOf(MAX_ATTEMPTS)
