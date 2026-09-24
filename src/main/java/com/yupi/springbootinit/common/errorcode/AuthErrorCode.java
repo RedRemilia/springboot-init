@@ -14,6 +14,8 @@ public enum AuthErrorCode implements ErrorCode {
     VERIFY_PHONE_ERROR(10004, "手机号不正确"),
     VERIFY_PHONE_CHANGED(10005, "手机号发生变化，请重新获取验证码"),
 
+    USER_NOT_EXIST(10100, "用户不存在"),
+    WRONG_PASSWORD(10101, "密码错误")
     ;
 
     private final Integer code;

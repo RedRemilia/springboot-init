@@ -1,6 +1,10 @@
 package com.yupi.springbootinit.service.impl;
 
 import cn.hutool.crypto.SecureUtil;
+import cn.hutool.jwt.JWT;
+import cn.hutool.jwt.JWTPayload;
+import cn.hutool.jwt.JWTUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.yupi.springbootinit.common.errorcode.AuthErrorCode;
@@ -18,10 +22,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,14 +40,6 @@ public class UserNewServiceImpl extends ServiceImpl<UserNewMapper, UserNew>
     private final RedisUtil redisUtil;
     private final StringRedisTemplate stringRedisTemplate;
     private final DefaultRedisScript<Long> verifyCodeScript;
-
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public long registerNew(UserNew userNew) {
-
-        this.save(userNew);
-        return userNew.getUserId();
-    }
 
     /**
      * 发送验证码
@@ -119,7 +116,24 @@ public class UserNewServiceImpl extends ServiceImpl<UserNewMapper, UserNew>
             userNew.setLastLoginTime(LocalDateTime.now());
             updateById(userNew);
         }
-        return getLoginUserNewVO(userNew);
+        return buildLoginUserInfo(userNew);
+    }
+
+    @Override
+    public LoginUserNewVO loginByPwd(String identifier, String pwd) {
+        // 根据phone或者email查找用户，两列均有唯一索引
+        LambdaQueryWrapper<UserNew> queryWrapper = new QueryWrapper<UserNew>().lambda();
+        queryWrapper.eq(UserNew::getPhone, identifier)
+                .or().eq(UserNew::getEmail, identifier);
+        UserNew userNew = getOne(queryWrapper);
+        if (userNew == null) {
+            throw new AuthException(AuthErrorCode.USER_NOT_EXIST);
+        }
+        String encPwd = SecureUtil.hmacSha256(CommonConstant.AUTH_HMAC_KEY).digestHex(pwd);
+        if (!encPwd.equals(userNew.getPassword())) {
+            throw new AuthException(AuthErrorCode.WRONG_PASSWORD);
+        }
+        return buildLoginUserInfo(userNew);
     }
 
     /**
@@ -137,21 +151,35 @@ public class UserNewServiceImpl extends ServiceImpl<UserNewMapper, UserNew>
         userNew.setLastLoginTime(LocalDateTime.now());
         save(userNew);
         return userNew;
-
     }
+
 
     /**
      * 将用户信息转换成前端所需格式
      * @param userNew 用户表用户信息
      * @return 前端所需用户信息
      */
-    @Override
-    public LoginUserNewVO getLoginUserNewVO(UserNew userNew) {
+    public LoginUserNewVO buildLoginUserInfo(UserNew userNew) {
         LoginUserNewVO loginUserNewVO = new LoginUserNewVO();
         loginUserNewVO.setUserId(userNew.getUserId());
         loginUserNewVO.setUserName(userNew.getUserName());
+        // 创建token
+//        Map<String, Object> payload = new HashMap<>();
+//        payload.put("userId", userNew.getUserId());
+//        payload.put(JWTPayload.ISSUED_AT, System.currentTimeMillis()/1000);
+//        payload.put(JWTPayload.EXPIRES_AT, System.currentTimeMillis()/1000 + 3600);
+//        payload.put(JWTPayload.NOT_BEFORE, System.currentTimeMillis()/1000);
+//        String token = JWTUtil.createToken(payload, CommonConstant.GENERATE_TOKEN_KEY.getBytes());
+
+        String token = JWT.create()
+                .setPayload("userId", userNew.getUserId())
+                .setPayload("phone", userNew.getPhone())
+                .setKey(CommonConstant.GENERATE_TOKEN_KEY.getBytes(StandardCharsets.UTF_8))
+                .setExpiresAt(new Date(System.currentTimeMillis() + 3600 * 1000))
+                .sign();
+        loginUserNewVO.setToken(token);
+
         return loginUserNewVO;
     }
-
 
 }

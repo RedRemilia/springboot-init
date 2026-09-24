@@ -27,6 +27,8 @@ public class UserNew implements Serializable {
 
     String phone;
 
+    String email;
+
     LocalDateTime createTime;
 
     LocalDateTime updateTime;

@@ -19,5 +19,7 @@ public interface CommonConstant {
     String SORT_ORDER_DESC = "descend";
 
     String AUTH_HMAC_KEY = "asdf20260101";
+
+    String GENERATE_TOKEN_KEY = "token20260101";
     
 }

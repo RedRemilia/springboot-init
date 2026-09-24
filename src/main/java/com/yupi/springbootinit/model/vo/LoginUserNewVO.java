@@ -15,4 +15,6 @@ public class LoginUserNewVO implements Serializable {
 
     private String userName;
 
+    private String token;
+
 }

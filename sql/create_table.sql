@@ -34,13 +34,13 @@ create table if not exists userNew
     userName varchar(255) not null comment '用户名',
     password varchar(255) comment '密码',
     phone varchar(20) not null unique comment '手机号',
+    email varchar(255) not null unique comment '邮箱',
     isDeleted bool not null default false comment '是否删除',
     createTime DATETIME comment '创建时间',
     updateTime DATETIME comment '上次修改时间',
     lastLoginTime DATETIME comment '上次登录时间',
     lastLoginIP varchar(16) comment '上次登录IP'
 ) comment '用户测试' collate = utf8mb4_unicode_ci;
-
 
 -- 帖子表
 create table if not exists post
