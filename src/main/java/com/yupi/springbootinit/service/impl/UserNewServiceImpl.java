@@ -17,6 +17,7 @@ import com.yupi.springbootinit.utils.RedisUtil;
 import com.yupi.springbootinit.utils.CustomUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
@@ -30,7 +31,6 @@ import java.util.*;
 @RequiredArgsConstructor
 public class UserNewServiceImpl extends ServiceImpl<UserNewMapper, UserNew>
         implements UserNewService {
-
 
     private final RedisUtil redisUtil;
     private final StringRedisTemplate stringRedisTemplate;

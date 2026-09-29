@@ -4,16 +4,16 @@ import com.yupi.springbootinit.annotation.Auth;
 import com.yupi.springbootinit.common.BaseResponse;
 import com.yupi.springbootinit.common.ResultUtils;
 import com.yupi.springbootinit.common.errorcode.HttpErrorCode;
-import com.yupi.springbootinit.config.WxOpenConfig;
 import com.yupi.springbootinit.exception.AuthException;
 import com.yupi.springbootinit.exception.BaseException;
 import com.yupi.springbootinit.model.dto.user.UserPwdLoginRequest;
 import com.yupi.springbootinit.model.dto.user.UserSendVerifyCodeRequest;
 import com.yupi.springbootinit.model.dto.user.UserVeriCodeLoginRequest;
 import com.yupi.springbootinit.model.vo.LoginVO;
+import com.yupi.springbootinit.model.vo.NewsLoginVO;
 import com.yupi.springbootinit.model.vo.ValidateVO;
+import com.yupi.springbootinit.service.NewsUserService;
 import com.yupi.springbootinit.service.UserNewService;
-import com.yupi.springbootinit.service.UserService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -33,27 +33,10 @@ public class UserController {
     @Resource
     private UserNewService userNewService;
 
+    @Resource
+    private NewsUserService newsUserService;
+
     // region 登录相关
-
-//    /**
-//     * 用户注册
-//     */
-//    @PostMapping("/register")
-//    public BaseResponse<Long> userRegister(@RequestBody UserRegisterRequest userRegisterRequest) {
-//        if (userRegisterRequest == null) {
-//            throw new BaseException(OldErrorCode.PARAMS_ERROR);
-//        }
-//        String userAccount = userRegisterRequest.getUserAccount();
-//        String userPassword = userRegisterRequest.getUserPassword();
-//        String checkPassword = userRegisterRequest.getCheckPassword();
-//        if (StringUtils.isAnyBlank(userAccount, userPassword, checkPassword)) {
-//            return null;
-//        }
-//        long result = userService.userRegister(userAccount, userPassword, checkPassword);
-//        return ResultUtils.success(result);
-//    }
-
-
     /**
      * 发送验证码
      */
@@ -99,22 +82,13 @@ public class UserController {
     }
 
     @PostMapping("/login/pwd")
-    public BaseResponse<LoginVO> pwdLogin(@RequestBody @Valid UserPwdLoginRequest userPwdLoginRequest) {
+    public BaseResponse<NewsLoginVO> pwdLogin(@RequestBody @Valid UserPwdLoginRequest userPwdLoginRequest) {
         if (userPwdLoginRequest == null) {
             throw new BaseException(HttpErrorCode.PARAMS_ERROR);
         }
         String identifier = userPwdLoginRequest.getIdentifier();
         String password = userPwdLoginRequest.getPassword();
-        LoginVO loginVO = new LoginVO();
-        ValidateVO validate = new ValidateVO();
-        loginVO.setValidate(validate);
-        try {
-            loginVO.setLoginUserNew(userNewService.loginByPwd(identifier, password));
-            validate.setStatus(true);
-        } catch (AuthException e) {
-            validate.setStatus(false);
-        }
-        return ResultUtils.success(loginVO);
+        return ResultUtils.success(newsUserService.login(identifier, password));
     }
 
     @PostMapping("/update")
@@ -123,8 +97,6 @@ public class UserController {
         if (userPwdLoginRequest == null) {
             throw new BaseException(HttpErrorCode.PARAMS_ERROR);
         }
-
-
 
         return ResultUtils.success(true);
     }

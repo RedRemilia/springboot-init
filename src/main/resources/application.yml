@@ -16,10 +16,12 @@ spring:
   # 数据库配置
   # todo 需替换配置
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/my_db
-    username: root
-    password: Aa123456
+    type: com.alibaba.druid.pool.DruidDataSource
+    druid:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      url: jdbc:mysql://localhost:3306/my_db
+      username: root
+      password: Aa123456
   # Redis 配置（Boot 3.x 属性为 spring.data.redis.*）
   # todo 需替换配置，然后取消注释
   data:
@@ -51,13 +53,15 @@ server:
         max-age: 2592000
 mybatis-plus:
   configuration:
-    map-underscore-to-camel-case: false
+    map-underscore-to-camel-case: true
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
   global-config:
     db-config:
       logic-delete-field: isDelete # 全局逻辑删除的实体字段名
       logic-delete-value: 1 # 逻辑已删除值（默认为 1）
       logic-not-delete-value: 0 # 逻辑未删除值（默认为 0）
+      id-type: auto
+  type-aliases-package:
 # 微信相关
 wx:
   # 微信公众平台
@@ -87,3 +91,11 @@ cos:
     secretKey: xxx
     region: xxx
     bucket: xxx
+
+jwt:
+  token:
+    sign: asd20261010
+    expiration: 7200000 #单位ms, 即2小时过期
+
+login:
+  sign: asdfghjklqwertyuiopzxcvbnm1024

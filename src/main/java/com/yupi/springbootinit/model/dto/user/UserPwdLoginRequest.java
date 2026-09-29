@@ -14,10 +14,10 @@ public class UserPwdLoginRequest implements Serializable
 	private static final long serialVersionUID = 1L;
 
     @NotBlank(message = "账号不能为空")
-    @Pattern(
-        regexp = "^(1[3-9]\\d{9}|[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,})$",
-        message = "账号必须是手机号或邮箱"
-    )
+//    @Pattern(
+//        regexp = "^(1[3-9]\\d{9}|[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,})$",
+//        message = "账号必须是手机号或邮箱"
+//    )
     private String identifier;
 
     @NotBlank(message = "密码不能为空")

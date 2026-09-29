@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yupi.springbootinit.mapper.NewsTypeMapper">
+
+    <resultMap id="BaseResultMap" type="com.yupi.springbootinit.model.entity.NewsType">
+            <id property="tid" column="tid" />
+            <result property="tname" column="tname" />
+            <result property="version" column="version" />
+            <result property="idDeleted" column="id_deleted" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        tid,tname,version,id_deleted
+    </sql>
+</mapper>

@@ -57,8 +57,6 @@ class UserControllerTest {
     @MockitoBean
     private BorrowRecordMapper borrowRecordMapper;
     @MockitoBean
-    private EmployeeMapper employeeMapper;
-    @MockitoBean
     private PostFavourMapper postFavourMapper;
     @MockitoBean
     private PostMapper postMapper;
